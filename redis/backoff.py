@@ -1,5 +1,5 @@
-import random
 from abc import ABC, abstractmethod
+import secrets
 
 # Maximum backoff between each retry in seconds
 DEFAULT_CAP = 0.512
@@ -69,7 +69,7 @@ class FullJitterBackoff(AbstractBackoff):
         self._base = base
 
     def compute(self, failures):
-        return random.uniform(0, min(self._cap, self._base * 2**failures))
+        return secrets.SystemRandom().uniform(0, min(self._cap, self._base * 2**failures))
 
 
 class EqualJitterBackoff(AbstractBackoff):
@@ -85,7 +85,7 @@ class EqualJitterBackoff(AbstractBackoff):
 
     def compute(self, failures):
         temp = min(self._cap, self._base * 2**failures) / 2
-        return temp + random.uniform(0, temp)
+        return temp + secrets.SystemRandom().uniform(0, temp)
 
 
 class DecorrelatedJitterBackoff(AbstractBackoff):
@@ -105,7 +105,7 @@ class DecorrelatedJitterBackoff(AbstractBackoff):
 
     def compute(self, failures):
         max_backoff = max(self._base, self._previous_backoff * 3)
-        temp = random.uniform(self._base, max_backoff)
+        temp = secrets.SystemRandom().uniform(self._base, max_backoff)
         self._previous_backoff = min(self._cap, temp)
         return self._previous_backoff
 

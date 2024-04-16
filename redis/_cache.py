@@ -1,5 +1,4 @@
 import copy
-import random
 import time
 from abc import ABC, abstractmethod
 from collections import OrderedDict, defaultdict
@@ -7,6 +6,7 @@ from enum import Enum
 from typing import List
 
 from redis.typing import KeyT, ResponseT
+import secrets
 
 DEFAULT_EVICTION_POLICY = "lru"
 
@@ -326,7 +326,7 @@ class _LocalCache(AbstractCache):
             )
             self.cache.pop(min_access_command)
         elif self.eviction_policy == EvictionPolicy.RANDOM.value:
-            random_command = random.choice(list(self.cache.keys()))
+            random_command = secrets.choice(list(self.cache.keys()))
             self.cache.pop(random_command)
 
     def _update_key_commands_map(self, keys: List[KeyT], command: str):

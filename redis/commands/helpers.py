@@ -1,10 +1,10 @@
 import copy
-import random
 import string
 from typing import List, Tuple
 
 import redis
 from redis.typing import KeysT, KeyT
+import secrets
 
 
 def list_or_args(keys: KeysT, args: Tuple[KeyT, ...]) -> List[KeyT]:
@@ -103,7 +103,7 @@ def random_string(length=10):
     Returns a random N character long string.
     """
     return "".join(  # nosec
-        random.choice(string.ascii_lowercase) for x in range(length)
+        secrets.choice(string.ascii_lowercase) for x in range(length)
     )
 
 

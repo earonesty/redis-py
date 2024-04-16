@@ -1,4 +1,3 @@
-import random
 import socket
 import sys
 import threading
@@ -41,6 +40,7 @@ from redis.utils import (
     safe_str,
     str_if_bytes,
 )
+import secrets
 
 
 def get_node_name(host: str, port: Union[str, int]) -> str:
@@ -441,12 +441,12 @@ class AbstractRedisCluster:
             primaries = [node for node in self.get_primaries() if node != curr_node]
             if primaries:
                 # Choose a primary if the cluster contains different primaries
-                self.nodes_manager.default_node = random.choice(primaries)
+                self.nodes_manager.default_node = secrets.choice(primaries)
             else:
                 # Otherwise, hoose a primary if the cluster contains different primaries
                 replicas = [node for node in self.get_replicas() if node != curr_node]
                 if replicas:
-                    self.nodes_manager.default_node = random.choice(replicas)
+                    self.nodes_manager.default_node = secrets.choice(replicas)
 
 
 class RedisCluster(AbstractRedisCluster, RedisClusterCommands):
@@ -708,7 +708,7 @@ class RedisCluster(AbstractRedisCluster, RedisClusterCommands):
         return self.nodes_manager.get_nodes_by_server_type(REPLICA)
 
     def get_random_node(self):
-        return random.choice(list(self.nodes_manager.nodes_cache.values()))
+        return secrets.choice(list(self.nodes_manager.nodes_cache.values()))
 
     def get_nodes(self):
         return list(self.nodes_manager.nodes_cache.values())
@@ -987,7 +987,7 @@ class RedisCluster(AbstractRedisCluster, RedisClusterCommands):
             # if there are 0 keys, that means the script can be run on any node
             # so we can just return a random slot
             if len(eval_keys) == 0:
-                return random.randrange(0, REDIS_CLUSTER_HASH_SLOTS)
+                return secrets.SystemRandom().randrange(0, REDIS_CLUSTER_HASH_SLOTS)
             keys = eval_keys
         else:
             keys = self._get_command_keys(*args)
@@ -995,7 +995,7 @@ class RedisCluster(AbstractRedisCluster, RedisClusterCommands):
                 # FCALL can call a function with 0 keys, that means the function
                 #  can be run on any node so we can just return a random slot
                 if command.upper() in ("FCALL", "FCALL_RO"):
-                    return random.randrange(0, REDIS_CLUSTER_HASH_SLOTS)
+                    return secrets.SystemRandom().randrange(0, REDIS_CLUSTER_HASH_SLOTS)
                 raise RedisClusterException(
                     "No way to dispatch this command to Redis Cluster. "
                     "Missing key.\nYou can execute the command by specifying "
@@ -1432,7 +1432,7 @@ class NodesManager:
         else:
             # return a replica
             # randomly choose one of the replicas
-            node_idx = random.randint(1, len(self.slots_cache[slot]) - 1)
+            node_idx = secrets.SystemRandom().randint(1, len(self.slots_cache[slot]) - 1)
 
         return self.slots_cache[slot][node_idx]
 
