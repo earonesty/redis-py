@@ -1370,7 +1370,7 @@ class NodesManager:
         redirected_node = self.get_node(host=e.host, port=e.port)
         if redirected_node is not None:
             # The node already exists
-            if redirected_node.server_type is not PRIMARY:
+            if redirected_node.server_type != PRIMARY:
                 # Update the node's server type
                 redirected_node.server_type = PRIMARY
         else:
