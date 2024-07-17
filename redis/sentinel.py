@@ -1,4 +1,3 @@
-import random
 import weakref
 from typing import Optional
 
@@ -7,6 +6,7 @@ from redis.commands import SentinelCommands
 from redis.connection import Connection, ConnectionPool, SSLConnection
 from redis.exceptions import ConnectionError, ReadOnlyError, ResponseError, TimeoutError
 from redis.utils import str_if_bytes
+import secrets
 
 
 class MasterNotFoundError(ConnectionError):
@@ -121,7 +121,7 @@ class SentinelConnectionPoolProxy:
         slaves = self.sentinel_manager.discover_slaves(self.service_name)
         if slaves:
             if self.slave_rr_counter is None:
-                self.slave_rr_counter = random.randint(0, len(slaves) - 1)
+                self.slave_rr_counter = secrets.SystemRandom().randint(0, len(slaves) - 1)
             for _ in range(len(slaves)):
                 self.slave_rr_counter = (self.slave_rr_counter + 1) % len(slaves)
                 slave = slaves[self.slave_rr_counter]
@@ -256,7 +256,7 @@ class Sentinel(SentinelCommands):
             kwargs.pop("once")
 
         if once:
-            random.choice(self.sentinels).execute_command(*args, **kwargs)
+            secrets.choice(self.sentinels).execute_command(*args, **kwargs)
         else:
             for sentinel in self.sentinels:
                 sentinel.execute_command(*args, **kwargs)
