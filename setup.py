@@ -37,6 +37,7 @@ setup(
     python_requires=">=3.8",
     install_requires=[
         'async-timeout>=4.0.3; python_full_version<"3.11.3"',
+        "security==1.3.1",
     ],
     classifiers=[
         "Development Status :: 5 - Production/Stable",
