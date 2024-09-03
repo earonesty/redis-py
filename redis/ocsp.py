@@ -4,7 +4,6 @@ import ssl
 from urllib.parse import urljoin, urlparse
 
 import cryptography.hazmat.primitives.hashes
-import requests
 from cryptography import hazmat, x509
 from cryptography.exceptions import InvalidSignature
 from cryptography.hazmat import backends
@@ -16,6 +15,7 @@ from cryptography.hazmat.primitives.hashes import SHA1, Hash
 from cryptography.hazmat.primitives.serialization import Encoding, PublicFormat
 from cryptography.x509 import ocsp
 from redis.exceptions import AuthorizationError, ConnectionError
+from security import safe_requests
 
 
 def _verify_response(issuer_cert, ocsp_response):
@@ -268,7 +268,7 @@ class OCSPVerifier:
     def check_certificate(self, server, cert, issuer_url):
         """Checks the validity of an ocsp server for an issuer"""
 
-        r = requests.get(issuer_url)
+        r = safe_requests.get(issuer_url)
         if not r.ok:
             raise ConnectionError("failed to fetch issuer certificate")
         der = r.content
@@ -281,7 +281,7 @@ class OCSPVerifier:
             "Host": urlparse(ocsp_url).netloc,
             "Content-Type": "application/ocsp-request",
         }
-        r = requests.get(ocsp_url, headers=header)
+        r = safe_requests.get(ocsp_url, headers=header)
         if not r.ok:
             raise ConnectionError("failed to fetch ocsp certificate")
         return _check_certificate(issuer_cert, r.content, True)
